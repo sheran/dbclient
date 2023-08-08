@@ -3,6 +3,7 @@ package dbclient
 import (
 	"database/sql"
 	"fmt"
+	"strings"
 
 	_ "github.com/lib/pq"
 	_ "github.com/mattn/go-sqlite3"
@@ -43,22 +44,22 @@ func UseSQLite(filename string) DBOption {
 
 func UsePostgres(user, pass, host, name string, useSSL bool) DBOption {
 	return func(c *DBClient) error {
-		var sslmode string
-		if !useSSL {
-			sslmode = "sslmode=disable"
+		var dsn strings.Builder
+		dsn.WriteString(fmt.Sprintf("user=%s ", user))
+		dsn.WriteString(fmt.Sprintf("password=%s ", pass))
+		dsn.WriteString(fmt.Sprintf("host=%s ", host))
+		if name != "" {
+			dsn.WriteString(fmt.Sprintf("dbname=%s ", name))
+			c.DBName = name
 		}
-		dsn := fmt.Sprintf(
-			"user=%s password=%s host=%s dbname=%s %s",
-			user,
-			pass,
-			host,
-			name,
-			sslmode,
-		)
+		if !useSSL {
+			dsn.WriteString("sslmode=disable")
+		}
+
 		c.DBHost = host
-		c.DBName = name
+
 		c.Type = "postgres"
-		db, err := sql.Open("postgres", dsn)
+		db, err := sql.Open("postgres", dsn.String())
 		if err != nil {
 			return err
 		}

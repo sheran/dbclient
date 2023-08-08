@@ -10,6 +10,7 @@ func TestSQLite(t *testing.T) {
 	if err != nil {
 		panic(err)
 	}
+	defer client.Close()
 	if err := client.Ping(); err != nil {
 		panic(err)
 	}
@@ -21,12 +22,13 @@ func TestPostgres(t *testing.T) {
 		"postgres",
 		"postgres",
 		"localhost",
-		"databurse",
+		"",
 		false,
 	))
 	if err != nil {
 		panic(err)
 	}
+	defer client.Close()
 	if err := client.Ping(); err != nil {
 		panic(err)
 	}
