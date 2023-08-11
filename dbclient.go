@@ -72,6 +72,41 @@ func (c *DBClient) Ping() error {
 	return c.Conn.Ping()
 }
 
+func (c *DBClient) ListDatabases() ([]string, error) {
+	var sql string
+	switch c.Type {
+	case "postgres":
+		sql = "SELECT datname FROM pg_database WHERE datistemplate = false;"
+	}
+	rows, err := c.Conn.Query(sql)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	databases := make([]string, 0)
+	for rows.Next() {
+		var dbName string
+		if err := rows.Scan(&dbName); err != nil {
+			return nil, err
+		}
+		databases = append(databases, dbName)
+	}
+	return databases, nil
+}
+
+func (c *DBClient) CreateDatabase(name string) error {
+	var sql string
+	switch c.Type {
+	case "postgres":
+		sql = fmt.Sprintf("CREATE DATABASE %s;", name)
+	}
+	_, err := c.Conn.Exec(sql)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func (c *DBClient) CreateTable(name string, fields ...map[string]string) error {
 	sql := fmt.Sprintf("CREATE TABLE IF NOT EXISTS %s ", name)
 	sql += "("

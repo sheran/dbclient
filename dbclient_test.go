@@ -33,12 +33,18 @@ func TestPostgres(t *testing.T) {
 		panic(err)
 	}
 	fmt.Println("connected")
-	fields := []map[string]string{
-		{"ID": "SERIAL PRIMARY KEY"},
-		{"NAME": "varchar"}}
-
-	if err := client.CreateTable("dertable", fields...); err != nil {
+	dbs, err := client.ListDatabases()
+	if err != nil {
 		panic(err)
 	}
+	fmt.Println(dbs)
+	// if err := client.CreateDatabase("database1"); err != nil {
+	// 	panic(err)
+	// }
+	// dbs, err = client.ListDatabases()
+	// if err != nil {
+	// 	panic(err)
+	// }
+	// fmt.Println(dbs)
 
 }
